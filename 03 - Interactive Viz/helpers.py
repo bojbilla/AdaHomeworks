@@ -1,7 +1,9 @@
+import googlemaps
 """"
 File containing helper methods, factored out to lighten the notebook up
 """
 
+#deprecated, use googlemaps library instead
 def request_gmaps(name):
     """
     Requests Google maps Places API with the specified name. 
@@ -25,12 +27,13 @@ def split_and_request(name):
     others with only the second part, thus we try both. Returns None if there is no 
     result.
     """
+    gmaps = googlemaps.Client('')
     uni = name.split(' - ')
     for x in uni:
-        r = request_gmaps(x).json()
-        if(r['status'] != 'ZERO_RESULTS'):
+        r = gmaps.places(x)
+        if r:
             return r
-            
+    #no result        
     print(name)
     return None
 
