@@ -3,22 +3,7 @@ import googlemaps
 File containing helper methods, factored out to lighten the notebook up
 """
 
-#deprecated, use googlemaps library instead
-def request_gmaps(name):
-    """
-    Requests Google maps Places API with the specified name. 
-    It adds 'Switzerland' to the query to get more specific results.
-    IMPORTANT: 
-    Needs a Google API Key to work. This should never be published on github. 
-    """
-    url = 'https://maps.googleapis.com/maps/api/place/textsearch/json?'
-    payload = {
-        'query': name+' Switzerland',
-        'key': ''
-    }
-    return requests.get(url,payload)
-
-
+#gmaps = googlemaps.Client('')
 
 def split_and_request(name):
     """
@@ -27,10 +12,11 @@ def split_and_request(name):
     others with only the second part, thus we try both. Returns None if there is no 
     result.
     """
-    gmaps = googlemaps.Client('')
     uni = name.split(' - ')
     for x in uni:
         r = gmaps.places(x)
+        #this isn't right, should be if r['results']
+        #however we probably won't use it anymore so might as well leave it
         if r:
             return r
     #no result        
@@ -38,12 +24,26 @@ def split_and_request(name):
     return None
 
 
-def json_2_lat_lon(json):
+
+def canton_from_coordinates(coordinates):
     """
-    Extracts the latitude and the longitude from the result of a request.
+    Using Google Maps Geocode API, more specifically reverse geocoding,
+    get the canton code from the raw localisation.
+    Throws exception if an object with the wrong format is input. 
     """
-    try:
-        return json['results'][0]['geometry']['location']
-    except:
-        print(json)
+    if coordinates is None:
         return None
+    response = gmaps.reverse_geocode(coordinates)
+    #extract the canton code from the mess
+    #it is in the field of type administrative_area_level_1 field
+    return next(x for x in response[0]['address_components'] if 'administrative_area_level_1' in x['types'])['short_name']
+
+def extract_lat_lng(row):
+    if not row['Raw localisation']['results']:
+        return None
+    else:
+        return row['Raw localisation']['results'][0]['geometry']['location']
+
+def print_index_if_empty(row):
+    if not row['Raw localisation']['results']:
+        print(row.name)
