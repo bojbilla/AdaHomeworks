@@ -1,4 +1,5 @@
 import googlemaps
+import folium
 from yandex_translate import YandexTranslate
 """"
 File containing helper methods, factored out to lighten the notebook up
@@ -61,3 +62,18 @@ def split_and_geocode(name):
 def set_coordinates_and_canton(df, index, lng, lat, canton):
     df.set_value(index, 'Coordinates', {'lng': lng, 'lat': lat})
     df.set_value(index, 'Canton', canton)
+    
+def create_marker(row, total_canton, total):
+    """
+    Returns a folium marker at the location of the specified university,
+    containing the name of the uni, how much % of canton grants it has and
+    how much % of total"""
+    location = [row['Coordinates']['lat'], row['Coordinates']['lng']]
+    uni = row['University']
+    grant = row['Approved Amount']
+    percent_canton = "{0:.2f}".format(100*grant/total_canton)
+    percent_total = "{0:.2f}".format(100*grant/total)
+    return folium.Marker(location = location,
+                         popup="Name: "+uni+
+                             "\n Percentage of Canton: "+percent_canton+
+                             "\n Percentage of total: "+percent_total)
