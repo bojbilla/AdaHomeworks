@@ -23,6 +23,15 @@ def cloud(text):
     plt.axis("off")
     plt.show()
 	
+def usa_cloud(text):
+    """ Generate wordcloud """
+    text = ' '.join(text) if type(text) != str else text
+    usa_mask = np.array(Image.open(path.join(path.dirname(__file__), "usa_map.jpg")))
+    wordcloud = wc(max_font_size=80, stopwords=[""], width=500, height=250, background_color='White', mask=usa_mask).generate(text)
+    plt.figure(figsize=(10,50))
+    plt.imshow(wordcloud)
+    plt.axis("off")
+    plt.show()
 def write(my_dict, name):
     """ Write to json """
     json.dump(my_dict, open(name+".json",'w'))
